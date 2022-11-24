@@ -25,6 +25,13 @@ async function run(){
             const laptops = await laptopsCollection.find(query).toArray();
             res.send(laptops)
         })
+
+        app.get('/laptops/:category', async(req, res)=>{
+            const category = req.params.category;
+            const query = {category:category}
+            const laptopCategory = await laptopsCollection.find(query).toArray();
+            res.send(laptopCategory);
+        })
     }
     finally{
 
