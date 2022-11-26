@@ -99,6 +99,19 @@ async function run(){
             res.send(result)
         })
         
+        // set Advertise
+        app.patch('/advertise/:id', async(req, res)=>{
+            const id = req.params.id;
+            const advertise = req.body.advertise;
+            const query = {_id:ObjectId(id)};
+            const updatedDoc = {
+                $set: {
+                    advertise:advertise
+                }
+            }
+            const result = await laptopsCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        })
 
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
