@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const port = process.env.PORT || 5000;
@@ -76,6 +76,23 @@ async function run(){
             res.send(result);
         })
 
+        // My products
+        app.get('/myProducts', async(req, res)=>{
+            const email = req.query.email;
+            const query = {email}
+            const result = await laptopsCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        // Delete Product
+        app.delete('/deleteProduct/:id', async(req, res)=>{
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)}
+            const result = await laptopsCollection.deleteOne(query);
+            res.send(result)
+        })
+        
+
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
             const query = { email: email };
@@ -86,6 +103,27 @@ async function run(){
             }
             res.status(403).send({ accessToken: '' })
         });
+
+        // // temporary insert data
+        // app.get('/laptopsTemp', async (req, res) => {
+        //     const filter = {}
+        //     const options = { upsert: true }
+        //     const updatedDoc = {
+        //         $set: {
+        //             email: 'anjonroy123@gmail.com'
+        //         }
+        //     }
+        //     const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
+        //     res.send(result);
+        // })
+        // temporary product insert
+        // app.get('/laptopsTemp', async (req, res) => {
+        //     const filter = {}
+        //     // const options = { upsert: true }
+        //     const updatedDoc = { "name": "Dell Latitude 7480 Core i5 7th Gen Laptop", "category": "dell", "categoryImage": "https://raw.githubusercontent.com/aroy15/image-store/master/laptop/dell-logo.webp", "image": "https://raw.githubusercontent.com/aroy15/image-store/master/laptop/dell-latitude-7480-core-i5-7th-gen-laptop.webp", "location": "Chattogram", "yearsOfUse": 3, "resalePrice": 5, "originalPrice": 10, "postedTime": "Nov 17, 2022", "seller": "Rakibul", "verified": false, "condition": "good", "description": "Dell Latitude 7480 laptop has 256GB SSD storage capacity, 8GB RAM, 14 inch full HD display, 2 x USB 3.0 / USB 3.0 / LAN / HDMI interface, multi-gesture touch pad.", "mobile": "+8801627084196", "email": "rakibul@gmail.com" }
+        //     const result = await laptopsCollection.insertOne(updatedDoc);
+        //     res.send(result);
+        // })
 
     }
     finally{
