@@ -48,11 +48,11 @@ async function run(){
             res.send(categories)
         })
 
-        // app.get('/laptops', async(req, res)=>{
-        //     const query = {};
-        //     const laptops = await laptopsCollection.find(query).toArray();
-        //     res.send(laptops)
-        // })
+        app.get('/laptops', async(req, res)=>{
+            const query = {};
+            const laptops = await laptopsCollection.find(query).toArray();
+            res.send(laptops)
+        })
 
         app.get('/laptops/:category', async(req, res)=>{
             const category = req.params.category;
@@ -91,6 +91,13 @@ async function run(){
             const result = await laptopsCollection.deleteOne(query);
             res.send(result)
         })
+
+        // Advertise product
+        app.get('/advertise', async(req, res)=>{
+            const query = {advertise:true}
+            const result = await laptopsCollection.find(query).toArray();
+            res.send(result)
+        })
         
 
         app.get('/jwt', async (req, res) => {
@@ -110,7 +117,7 @@ async function run(){
         //     const options = { upsert: true }
         //     const updatedDoc = {
         //         $set: {
-        //             email: 'anjonroy123@gmail.com'
+        //             advertise: false
         //         }
         //     }
         //     const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
@@ -120,7 +127,7 @@ async function run(){
         // app.get('/laptopsTemp', async (req, res) => {
         //     const filter = {}
         //     // const options = { upsert: true }
-        //     const updatedDoc = { "name": "Dell Latitude 7480 Core i5 7th Gen Laptop", "category": "dell", "categoryImage": "https://raw.githubusercontent.com/aroy15/image-store/master/laptop/dell-logo.webp", "image": "https://raw.githubusercontent.com/aroy15/image-store/master/laptop/dell-latitude-7480-core-i5-7th-gen-laptop.webp", "location": "Chattogram", "yearsOfUse": 3, "resalePrice": 5, "originalPrice": 10, "postedTime": "Nov 17, 2022", "seller": "Rakibul", "verified": false, "condition": "good", "description": "Dell Latitude 7480 laptop has 256GB SSD storage capacity, 8GB RAM, 14 inch full HD display, 2 x USB 3.0 / USB 3.0 / LAN / HDMI interface, multi-gesture touch pad.", "mobile": "+8801627084196", "email": "rakibul@gmail.com" }
+        //     const updatedDoc = { "name": "Dell Latitude 7480 Core i5 7th Gen Laptop", "category": "dell", "categoryImage": "https://raw.githubusercontent.com/aroy15/image-store/master/laptop/dell-logo.webp", "image": "https://raw.githubusercontent.com/aroy15/image-store/master/laptop/dell-latitude-7480-core-i5-7th-gen-laptop.webp", "location": "Chattogram", "yearsOfUse": 3, "resalePrice": 120, "originalPrice": 280, "postedTime": "Nov 17, 2022", "seller": "Rakibul", "verified": false, "condition": "good", "description": "Dell Latitude 7480 laptop has 256GB SSD storage capacity, 8GB RAM, 14 inch full HD display, 2 x USB 3.0 / USB 3.0 / LAN / HDMI interface, multi-gesture touch pad.", "mobile": "+8801627084196", "email": "rakibul@gmail.com" }
         //     const result = await laptopsCollection.insertOne(updatedDoc);
         //     res.send(result);
         // })
