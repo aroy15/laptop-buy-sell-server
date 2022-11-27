@@ -48,11 +48,11 @@ async function run(){
             res.send(categories)
         })
 
-        app.get('/laptops', async(req, res)=>{
-            const query = {};
-            const laptops = await laptopsCollection.find(query).toArray();
-            res.send(laptops)
-        })
+        // app.get('/laptops', async(req, res)=>{
+        //     const query = {};
+        //     const laptops = await laptopsCollection.find(query).toArray();
+        //     res.send(laptops)
+        // })
 
         app.get('/laptops/:category', async(req, res)=>{
             const category = req.params.category;
@@ -76,11 +76,26 @@ async function run(){
             res.send(result);
         })
 
+        // Get All Sellers
+        app.get('/sellers', async(req, res)=>{
+            const query = {userRole:'seller'}
+            const result = await usersCollection.find(query).toArray();
+            res.send(result)
+        })
+
         // My products
         app.get('/myProducts', async(req, res)=>{
             const email = req.query.email;
             const query = {email}
             const result = await laptopsCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        // Post Products
+
+        app.post('/addProduct', async(req, res)=>{
+            const product = req.body;
+            const result = await laptopsCollection.insertOne(product);
             res.send(result)
         })
 
@@ -99,7 +114,7 @@ async function run(){
             res.send(result)
         })
         
-        // set Advertise
+        // set Advertise with true/false
         app.patch('/advertise/:id', async(req, res)=>{
             const id = req.params.id;
             const advertise = req.body.advertise;
@@ -112,6 +127,7 @@ async function run(){
             const result = await laptopsCollection.updateOne(query, updatedDoc);
             res.send(result);
         })
+
 
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
@@ -130,7 +146,7 @@ async function run(){
         //     const options = { upsert: true }
         //     const updatedDoc = {
         //         $set: {
-        //             advertise: false
+        //             salesStatus: 'available'
         //         }
         //     }
         //     const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
