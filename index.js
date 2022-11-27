@@ -83,6 +83,50 @@ async function run(){
             res.send(result)
         })
 
+        // Get all buyers
+        app.get('/buyers', async(req, res)=>{
+            const query = {userRole:'buyer'}
+            const result = await usersCollection.find(query).toArray();
+            res.send(result)
+        })
+        
+        // delete user(seller/buyer)
+        app.delete('/deleteUser/:id', async(req, res)=>{
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)}
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // Make verified sellers
+        app.patch('/makeVerifiedSeller',  async(req, res)=>{
+            const email = req.query.email;
+            const verified = req.body;
+            const query = {email:email};
+            const updatedDoc = {
+                $set: verified
+            }
+            const result = await usersCollection.updateOne(query, updatedDoc);
+            res.send(result)            
+        })
+
+        // check admin role
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isAdmin: user?.userRole === 'admin' });
+        })
+
+        // check seller role
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isSeller: user?.userRole === 'seller' });
+        })
+
+
         // My products
         app.get('/myProducts', async(req, res)=>{
             const email = req.query.email;
@@ -92,7 +136,6 @@ async function run(){
         })
 
         // Post Products
-
         app.post('/addProduct', async(req, res)=>{
             const product = req.body;
             const result = await laptopsCollection.insertOne(product);
@@ -107,7 +150,7 @@ async function run(){
             res.send(result)
         })
 
-        // Advertise product
+        // Get Advertise product
         app.get('/advertise', async(req, res)=>{
             const query = {advertise:true}
             const result = await laptopsCollection.find(query).toArray();
@@ -140,13 +183,13 @@ async function run(){
             res.status(403).send({ accessToken: '' })
         });
 
-        // // temporary insert data
+        // temporary insert data
         // app.get('/laptopsTemp', async (req, res) => {
         //     const filter = {}
         //     const options = { upsert: true }
         //     const updatedDoc = {
         //         $set: {
-        //             salesStatus: 'available'
+        //             verified: false
         //         }
         //     }
         //     const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
