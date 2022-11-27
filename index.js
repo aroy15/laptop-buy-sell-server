@@ -98,7 +98,7 @@ async function run(){
             res.send(result);
         })
 
-        // Make verified sellers
+        // Make verified sellers and his/her products
         app.patch('/makeVerifiedSeller',  async(req, res)=>{
             const email = req.query.email;
             const verified = req.body;
@@ -107,7 +107,8 @@ async function run(){
                 $set: verified
             }
             const result = await usersCollection.updateOne(query, updatedDoc);
-            res.send(result)            
+            const verifyThatUsersProducts = await laptopsCollection.updateMany(query, updatedDoc);
+            res.send({result, verifyThatUsersProducts})            
         })
 
         // check admin role
@@ -123,7 +124,10 @@ async function run(){
             const email = req.params.email;
             const query = { email }
             const user = await usersCollection.findOne(query);
-            res.send({ isSeller: user?.userRole === 'seller' });
+            res.send({ 
+                isSeller: user?.userRole === 'seller', 
+                isVerified: user?.verified
+            });
         })
 
 
@@ -185,14 +189,15 @@ async function run(){
 
         // temporary insert data
         // app.get('/laptopsTemp', async (req, res) => {
-        //     const filter = {}
+        //     const filter = {email:"rakibul@gmail.com"}
         //     const options = { upsert: true }
         //     const updatedDoc = {
         //         $set: {
         //             verified: false
         //         }
         //     }
-        //     const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
+        //     // const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
+        //     const result = await usersCollection.updateOne(filter, updatedDoc, options);
         //     res.send(result);
         // })
         // temporary product insert
