@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const port = process.env.PORT || 5000;
 
@@ -41,6 +42,7 @@ async function run(){
         const categoriesCollection = client.db("laptopBuySell").collection("categories");
         const bookingsCollection = client.db("laptopBuySell").collection("bookings");
         const usersCollection = client.db("laptopBuySell").collection("users");
+        const paymentsCollection = client.db('laptopBuySell').collection('payments');
 
         app.get('/categories', async(req, res) => {
             const query= {}
@@ -56,7 +58,7 @@ async function run(){
 
         app.get('/laptops/:category', async(req, res)=>{
             const category = req.params.category;
-            const query = {category:category}
+            const query = {category:category,paid:false}
             const laptopCategory = await laptopsCollection.find(query).toArray();
             res.send(laptopCategory);
         })
@@ -169,7 +171,7 @@ async function run(){
 
         // Get Advertise product
         app.get('/advertise', async(req, res)=>{
-            const query = {advertise:true}
+            const query = {advertise:true, paid:false}
             const result = await laptopsCollection.find(query).toArray();
             res.send(result)
         })
@@ -188,6 +190,52 @@ async function run(){
             res.send(result);
         })
 
+        app.post('/create-payment-intent', async (req, res) => {
+            const booking = req.body;
+            const price = booking.price;
+            const amount = price * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                "payment_method_types": [
+                    "card"
+                ]
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        });
+
+        app.post('/payments', async (req, res) =>{
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+            const id = payment.bookingId
+            const filter = {_id: ObjectId(id)}            
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            
+            // update booking collection
+            const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc);
+            
+            const productId = payment.productId
+            const options = {upsert:true};
+            const productFilter = {_id:ObjectId(productId)}
+            const updatedProduct = {
+                $set: {
+                    paid: true,
+                }
+            }
+            // update product collection 
+            const updatedProductResult = laptopsCollection.updateOne(productFilter, updatedProduct)
+
+            res.send(result);
+        })
+        
 
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
@@ -200,17 +248,18 @@ async function run(){
             res.status(403).send({ accessToken: '' })
         });
 
-        // temporary insert data
+        // // temporary insert data
         // app.get('/laptopsTemp', async (req, res) => {
-        //     const filter = {email:"rakibul@gmail.com"}
+        //     const filter = {}
         //     const options = { upsert: true }
         //     const updatedDoc = {
         //         $set: {
-        //             verified: false
+        //             paid: false
         //         }
         //     }
+        //     const result = await bookingsCollection.updateMany(filter, updatedDoc, options);
         //     // const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
-        //     const result = await usersCollection.updateOne(filter, updatedDoc, options);
+        //     // const result = await usersCollection.updateOne(filter, updatedDoc, options);
         //     res.send(result);
         // })
         // temporary product insert
