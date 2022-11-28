@@ -68,11 +68,24 @@ async function run(){
             res.send(result);
         })
 
+        // Get Bookings Products
+        app.get('/booking', async(req, res)=>{
+            const email = req.query.email;
+            const query = {email:email}
+            const result = await bookingsCollection.find(query).toArray();
+            res.send(result);
+        })
+
 
         // Post users list
-        app.post('/users', async(req, res)=>{
+        app.put('/users', async(req, res)=>{
             const userData = req.body;
-            const result = await usersCollection.insertOne(userData);
+            const filter = {email:req.body.email}
+            const options = {upsert:true};
+            const updatedDoc = {
+                $set : userData
+            }
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         })
 
