@@ -190,6 +190,28 @@ async function run(){
             res.send(result);
         })
 
+        //patch Reported product
+        app.patch(('/reportedProduct/:id'), async(req, res)=>{
+            const id = req.params.id;
+            const filter = {_id:ObjectId(id)};
+            const report = req.body.report;
+            console.log('test', id)
+            const updatedDoc = {
+                $set:{
+                    buyerReported:report
+                }
+            }
+            const result = await laptopsCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
+
+        // get reported product
+        app.get('/reportedProduct', async(req, res)=>{
+            const query = {buyerReported:true};
+            const result = await laptopsCollection.find(query).toArray();
+            res.send(result)
+        })
+
         app.post('/create-payment-intent', async (req, res) => {
             const booking = req.body;
             const price = booking.price;
@@ -254,11 +276,11 @@ async function run(){
         //     const options = { upsert: true }
         //     const updatedDoc = {
         //         $set: {
-        //             paid: false
+        //             buyerReported: false
         //         }
         //     }
-        //     const result = await bookingsCollection.updateMany(filter, updatedDoc, options);
-        //     // const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
+        //     // const result = await bookingsCollection.updateMany(filter, updatedDoc, options);
+        //     const result = await laptopsCollection.updateMany(filter, updatedDoc, options);
         //     // const result = await usersCollection.updateOne(filter, updatedDoc, options);
         //     res.send(result);
         // })
