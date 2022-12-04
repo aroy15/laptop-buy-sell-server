@@ -79,7 +79,7 @@ async function run(){
         })
 
 
-        // Post users list
+        // Post/put users list
         app.put('/users', async(req, res)=>{
             const userData = req.body;
             const filter = {email:req.body.email}
